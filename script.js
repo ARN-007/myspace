@@ -21,34 +21,190 @@ function goHome() {
 document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
 document.getElementById('hero').style.display = 'block';
 
+
 /* ---------- CALENDAR ---------- */
+
 let currentDate = new Date();
+let selectedDate = null;
+
+let calendarEvents = JSON.parse(localStorage.getItem("calendarEvents") || "{}");
+
 const calendarGrid = document.getElementById("calendarGrid");
 const monthYear = document.getElementById("monthYear");
 
-function renderCalendar() {
-  calendarGrid.innerHTML = "";
-  const y = currentDate.getFullYear();
-  const m = currentDate.getMonth();
-  monthYear.textContent = currentDate.toLocaleString("default",{month:"long"})+" "+y;
+function saveCalendarEvents() {
+  localStorage.setItem("calendarEvents", JSON.stringify(calendarEvents));
+}
 
-  const firstDay = new Date(y,m,1).getDay();
-  const days = new Date(y,m+1,0).getDate();
+let editingEventIndex = null;
+let editingEventDate = null;
 
-  for(let i=0;i<firstDay;i++){
-    const e=document.createElement("div"); e.className="empty"; calendarGrid.appendChild(e);
+function editEvent(date, index) {
+  editingEventDate = date;
+  editingEventIndex = index;
+
+  document.getElementById("editEventInput").value =
+    calendarEvents[date][index].text;
+
+  openPopup("editEventPopup");
+}
+
+function saveEditedEvent() {
+  if (editingEventDate === null || editingEventIndex === null) return;
+
+  const newText = document.getElementById("editEventInput").value.trim();
+  if (!newText) return;
+
+  calendarEvents[editingEventDate][editingEventIndex].text = newText;
+
+  saveCalendarEvents();
+  renderEvents();
+
+  editingEventDate = null;
+  editingEventIndex = null;
+  closePopup("editEventPopup");
+}
+
+/* -------- DATE SELECTION -------- */
+
+function selectDate(year, month, day) {
+  selectedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  document.getElementById("selectedDateTitle").textContent = selectedDate;
+
+  const selected = new Date(year, month, day);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const addBtn = document.getElementById("addEventBtn");
+
+  if (selected < today) {
+    addBtn.disabled = true;
+    addBtn.style.opacity = "0.5";
+  } else {
+    addBtn.disabled = false;
+    addBtn.style.opacity = "1";
   }
 
-  const today=new Date();
-  for(let d=1;d<=days;d++){
-    const c=document.createElement("div"); c.textContent=d;
-    if(d===today.getDate() && m===today.getMonth() && y===today.getFullYear()) c.classList.add("today");
+  renderEvents();
+}
+
+
+/* -------- RENDER EVENTS -------- */
+
+function renderEvents() {
+  const list = document.getElementById("eventsList");
+  list.innerHTML = "";
+
+  if (!selectedDate || !calendarEvents[selectedDate]) return;
+
+  calendarEvents[selectedDate].forEach((event, i) => {
+    const card = document.createElement("div");
+    card.className = "event-card" + (event.completed ? " completed" : "");
+
+   card.innerHTML = `
+  <span>${event.text}</span>
+  <div class="event-actions">
+    ${
+      event.completed
+        ? `<button onclick="toggleEvent('${selectedDate}', ${i})">❌</button>`
+        : `<button onclick="toggleEvent('${selectedDate}', ${i})">✓</button>`
+    }
+    <button onclick="editEvent('${selectedDate}', ${i})">✏️</button>
+    <button onclick="deleteEvent('${selectedDate}', ${i})">🗑</button>
+  </div>
+`;
+
+
+    list.appendChild(card);
+  });
+}
+
+/* -------- EVENT ACTIONS -------- */
+
+const addEventBtn = document.getElementById("addEventBtn");
+if (addEventBtn) {
+  addEventBtn.onclick = () => {
+    const text = document.getElementById("eventText").value.trim();
+    if (!text || !selectedDate) return;
+
+    calendarEvents[selectedDate] = calendarEvents[selectedDate] || [];
+    calendarEvents[selectedDate].push({ text, completed: false });
+
+    document.getElementById("eventText").value = "";
+    saveCalendarEvents();
+    renderEvents();
+  };
+}
+
+
+function toggleEvent(date, index) {
+  calendarEvents[date][index].completed = !calendarEvents[date][index].completed;
+  saveCalendarEvents();
+  renderEvents();
+}
+
+
+
+function deleteEvent(date, index) {
+  calendarEvents[date].splice(index, 1);
+  if (calendarEvents[date].length === 0) delete calendarEvents[date];
+  saveCalendarEvents();
+  renderEvents();
+}
+
+/* -------- RENDER CALENDAR -------- */
+
+function renderCalendar() {
+  calendarGrid.innerHTML = "";
+
+  const y = currentDate.getFullYear();
+  const m = currentDate.getMonth();
+
+  monthYear.textContent =
+    currentDate.toLocaleString("default", { month: "long" }) + " " + y;
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const e = document.createElement("div");
+    e.className = "empty";
+    calendarGrid.appendChild(e);
+  }
+
+  const today = new Date();
+
+  for (let d = 1; d <= days; d++) {
+    const c = document.createElement("div");
+    c.textContent = d;
+
+    if (
+      d === today.getDate() &&
+      m === today.getMonth() &&
+      y === today.getFullYear()
+    ) {
+      c.classList.add("today");
+    }
+
+    c.onclick = () => selectDate(y, m, d);
     calendarGrid.appendChild(c);
   }
 }
-document.getElementById("prevMonth").onclick=()=>{currentDate.setMonth(currentDate.getMonth()-1);renderCalendar();}
-document.getElementById("nextMonth").onclick=()=>{currentDate.setMonth(currentDate.getMonth()+1);renderCalendar();}
+
+/* -------- MONTH NAVIGATION -------- */
+
+document.getElementById("prevMonth").onclick = () => {
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  renderCalendar();
+};
+
+document.getElementById("nextMonth").onclick = () => {
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  renderCalendar();
+};
+
 renderCalendar();
+
 
 /* ---------- TODO ---------- */
 const todoInput=document.getElementById("todoInput");
@@ -92,9 +248,9 @@ function setCustomTimer() {
 
   if (isNaN(minutes) || minutes <= 0) return;
 
-  pauseTimer();               // stop running timer
-  time = minutes * 60;        // convert to seconds
-  updateTimer();              // refresh display
+  pauseTimer();           
+  time = minutes * 60;       
+  updateTimer();              
 }
 
 
@@ -178,3 +334,4 @@ function closePopupAndRestore(popupId, pageId) {
 
   closePopup(popupId);
 }
+

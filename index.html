@@ -48,6 +48,17 @@
     </div>
     <div class="calendar-grid" id="calendarGrid"></div>
   </div>
+  <div class="calendar-events">
+  <h3 id="selectedDateTitle">Select a date</h3>
+
+  <div class="event-input">
+    <input id="eventText" placeholder="Add event..." />
+    <button id="addEventBtn">Add</button>
+  </div>
+
+  <div id="eventsList"></div>
+</div>
+
 </section>
 
 <!-- TODO -->
@@ -111,6 +122,19 @@
     </div>
   </div>
 </div>
+<div class="popup-overlay hidden" id="editEventPopup">
+  <div class="popup-box">
+    <h3>Edit Event</h3>
+
+    <textarea id="editEventInput" rows="4" style="width:100%"></textarea>
+
+    <div style="margin-top:1rem; text-align:right;">
+      <button onclick="closePopup('editEventPopup')">Cancel</button>
+      <button onclick="saveEditedEvent()">Save</button>
+    </div>
+  </div>
+</div>
+
 
 
 <script src="script.js"></script>
