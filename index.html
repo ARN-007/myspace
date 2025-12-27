@@ -8,123 +8,111 @@
 </head>
 <body>
 
-  <header class="topbar">
-    <h1>OnePlace</h1>
-    <select id="themeSwitcher">
-      <option value="dark">Dark</option>
-      <option value="light">Light</option>
-      <option value="neon">Neon</option>
-      <option value="minimal">Minimal</option>
-    </select>
-  </header>
+<header class="topbar">
+  <h1>OnePlace</h1>
+  <select id="themeSwitcher">
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+    <option value="neon">Neon</option>
+    <option value="minimal">Minimal</option>
+  </select>
+</header>
 
- <main>
+<main>
 
-  <!-- HERO PAGE -->
-  <section id="hero" class="page active">
-    <h1>OnePlace</h1>
-    <p>Your personal productivity dashboard</p>
+<!-- HERO -->
+<section id="hero" class="page active">
+  <h1>OnePlace</h1>
+  <p>Your personal productivity dashboard</p>
 
-    <div class="card-grid">
-      <div class="nav-card" onclick="openPage('calendar')">📅 Calendar</div>
-      <div class="nav-card" onclick="openPage('todo')">✅ To-Do</div>
-      <div class="nav-card" onclick="openPage('timer')">⏱ Focus Timer</div>
-      <div class="nav-card" onclick="openPage('notes')">📝 Notes</div>
+  <div class="card-grid">
+    <div class="nav-card" onclick="openPage('calendar')">📅 Calendar</div>
+    <div class="nav-card" onclick="openPage('todo')">✅ To-Do</div>
+    <div class="nav-card" onclick="openPage('timer')">⏱ Focus Timer</div>
+    <div class="nav-card" onclick="openAsPopup('notes','notesPopup')">📝 Notes</div>
+  </div>
+</section>
+
+<!-- CALENDAR -->
+<section id="calendar" class="page">
+  <button class="back" onclick="goHome()">← Back</button>
+  <div class="card calendar-card">
+    <div class="calendar-header">
+      <button id="prevMonth">◀</button>
+      <h2 id="monthYear"></h2>
+      <button id="nextMonth">▶</button>
     </div>
-  </section>
-
-  <!-- CALENDAR PAGE -->
-  <section id="calendar" class="page">
-    <button class="back" onclick="goHome()">← Back</button>
-
-    <div class="card calendar-card">
-
-  <div class="calendar-header">
-    <button id="prevMonth">◀</button>
-    <h2 id="monthYear"></h2>
-    <button id="nextMonth">▶</button>
+    <div class="weekdays">
+      <span>Sun</span><span>Mon</span><span>Tue</span>
+      <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
   </div>
+</section>
 
-  <div class="weekdays">
-    <span>Sun</span><span>Mon</span><span>Tue</span>
-    <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+<!-- TODO -->
+<section id="todo" class="page">
+  <button class="back" onclick="goHome()">← Back</button>
+  <div class="card">
+    <h2>To-Do</h2>
+    <input id="todoInput" placeholder="Add a task..." />
+    <ul id="todoList"></ul>
   </div>
+</section>
 
-  <div class="calendar-grid" id="calendarGrid"></div>
-
+<!-- TIMER -->
+<section id="timer" class="page">
+  <button class="back" onclick="goHome()">← Back</button>
+  <div class="card timer-card">
+    <h2 class="timer-title">Focus Timer</h2>
+    <div class="timer-input">
+  <input type="number" id="customMinutes" min="1" placeholder="Minutes" />
+  <button onclick="setCustomTimer()">Set</button>
 </div>
 
-  </section>
-
-  <!-- TODO PAGE -->
-  <section id="todo" class="page">
-    <button class="back" onclick="goHome()">← Back</button>
-
-    <div class="card">
-      <h2>To-Do</h2>
-      <input id="todoInput" placeholder="Add a task..." />
-      <ul id="todoList"></ul>
-    </div>
-  </section>
-
-  <!-- TIMER PAGE -->
- <section id="timer" class="page">
-
-  <button class="back" onclick="goHome()">← Back</button>
-
-  <div class="card timer-card">
-
-    <h2 class="timer-title">Focus Timer</h2>
-
     <div class="timer-display" id="timerDisplay">25:00</div>
-
     <div class="timer-controls">
       <button onclick="startTimer()">Start</button>
       <button onclick="pauseTimer()">Pause</button>
       <button onclick="resetTimer()">Reset</button>
     </div>
-
   </div>
-
 </section>
 
-
-  <!-- NOTES PAGE -->
- <section id="notes" class="page">
-
-  <button class="back" onclick="goHome()">← Back</button>
-
+<!-- NOTES -->
+<section id="notes" class="page">
+  <button class="back" onclick="closePopupAndRestore('notesPopup','notes')">← Back</button>
   <div class="card notes-card">
-
     <div class="notes-header">
       <h2>Notes</h2>
-      <button class="new-note-btn" onclick="createNote()">＋ New Note</button>
-      <button class="delete-note-btn" onclick="deleteNote()">🗑 Delete</button>
+      <div class="notes-actions">
+        <button class="new-note-btn" onclick="createNote()">＋ New Note</button>
+        <button class="delete-note-btn" onclick="deleteNote()">🗑 Delete</button>
+      </div>
     </div>
-
     <select id="notesList"></select>
-
-    <textarea
-      id="notesInput"
-      placeholder="Start writing your note here..."
-    ></textarea>
-
+    <textarea id="notesInput" placeholder="Start writing your note here..."></textarea>
   </div>
-
 </section>
-
 
 </main>
 
-
-
-  <script src="script.js"></script>
-  <!-- POPUPS -->
+<!-- POPUPS -->
 <div class="popup-overlay hidden" id="notesPopup">
+  <div class="popup-box"></div>
+</div>
+<div class="popup-overlay hidden" id="deleteConfirmPopup">
   <div class="popup-box">
-    <!-- Notes UI goes here -->
+    <h3 style="margin-bottom:1rem;">Delete this note?</h3>
+
+    <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+      <button onclick="closePopup('deleteConfirmPopup')">Cancel</button>
+      <button class="delete-note-btn" onclick="confirmDeleteNote()">Delete</button>
+    </div>
   </div>
 </div>
 
+
+<script src="script.js"></script>
 </body>
 </html>

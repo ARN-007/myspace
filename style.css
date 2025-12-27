@@ -367,3 +367,18 @@ li {
   transform: scale(1) translateY(0);
   opacity: 1;
 }
+#deleteConfirmPopup .popup-box {
+  max-width: 360px;
+}.timer-input {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.timer-input input {
+  width: 90px;
+  text-align: center;
+  font-size: 1rem;
+}
+
